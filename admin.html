@@ -134,8 +134,7 @@
   }
 
   /* ---------- App shell ---------- */
-  #app{ display:none; }
-  #app.ready{ display:block; }
+  #app{ display:block; }
 
   .topbar{
     position:sticky;
@@ -359,23 +358,6 @@
 </head>
 <body>
 
-<!-- ================= LOGIN GATE ================= -->
-<div id="loginGate">
-  <div class="login-card">
-    <div class="mono-eyebrow">Accès privé</div>
-    <h1>Administration<br>du portfolio</h1>
-    <form id="loginForm">
-      <div class="field">
-        <label for="pwd">Mot de passe</label>
-        <input type="password" id="pwd" autocomplete="current-password" required>
-      </div>
-      <button type="submit" class="btn-primary" style="width:100%;">Se connecter</button>
-      <div class="login-error" id="loginError">Mot de passe incorrect.</div>
-    </form>
-    <div class="login-hint">Mot de passe par défaut : <strong>winner2026</strong> — changez-le dans le code de <code>admin.html</code> (variable <code>ADMIN_PASSWORD</code>) avant de mettre ce fichier en ligne.</div>
-  </div>
-</div>
-
 <!-- ================= APP ================= -->
 <div id="app">
   <div class="topbar">
@@ -384,7 +366,6 @@
       <div class="topbar-actions">
         <span class="status-pill" id="statusPill"><span class="dot"></span> <span id="statusText">Publication en cours…</span></span>
         <a href="index.html" target="_blank" class="btn-ghost btn-sm" style="text-decoration:none; display:inline-block;">Voir le site ↗</a>
-        <button class="btn-danger btn-sm" id="logoutBtn">Déconnexion</button>
       </div>
     </div>
   </div>
@@ -558,40 +539,10 @@
 
 <script>
 (function(){
-  var ADMIN_PASSWORD = "winner2026"; // ⚠️ Changez ce mot de passe avant de mettre le site en ligne.
   var C = window.AWContent;
   var state = C.getDraftContent();
 
-  // ---------- Login ----------
-  var loginGate = document.getElementById('loginGate');
-  var app = document.getElementById('app');
-  var SESSION_KEY = 'aw_admin_session';
-
-  function unlock(){
-    loginGate.style.display = 'none';
-    app.classList.add('ready');
-    hydrateForm();
-  }
-
-  if (sessionStorage.getItem(SESSION_KEY) === '1'){
-    unlock();
-  }
-
-  document.getElementById('loginForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var val = document.getElementById('pwd').value;
-    if (val === ADMIN_PASSWORD){
-      sessionStorage.setItem(SESSION_KEY, '1');
-      unlock();
-    } else {
-      document.getElementById('loginError').classList.add('show');
-    }
-  });
-
-  document.getElementById('logoutBtn').addEventListener('click', function(){
-    sessionStorage.removeItem(SESSION_KEY);
-    location.reload();
-  });
+  hydrateForm();
 
   // ---------- Side nav ----------
   var navButtons = document.querySelectorAll('.side-nav button');
