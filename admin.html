@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administration — AKA WINNER</title>
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="content.js"></script>
+
+<style>
+  :root{
+    --ink:#0d0d0c;
+    --paper:#faf9f7;
+    --paper-alt:#f2f0ec;
+    --line:#e2ded6;
+    --grey:#7a7670;
+    --grey-light:#a9a49b;
+    --brass:#a97e4a;
+    --brass-soft:#c9a877;
+    --brass-wash:#f4ede1;
+    --danger:#b3452f;
+    --ok:#4d7a52;
+
+    --display:'Plus Jakarta Sans', sans-serif;
+    --body:'Inter', sans-serif;
+    --mono:'DM Mono', monospace;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{
+    background:var(--paper-alt);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; }
+  ::selection{ background:var(--brass); color:var(--paper); }
+  :focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+
+  input, textarea{
+    width:100%;
+    font-family:var(--body);
+    font-size:14.5px;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:var(--paper);
+    color:var(--ink);
+    transition:border-color 0.2s ease;
+  }
+  input:focus, textarea:focus{ border-color:var(--brass); }
+  textarea{ resize:vertical; min-height:80px; }
+  label{
+    display:block;
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--grey);
+    margin-bottom:8px;
+  }
+  .field{ margin-bottom:20px; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:720px){ .field-row{ grid-template-columns:1fr; } }
+
+  button{
+    font-family:var(--mono);
+    font-size:12.5px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    border:none;
+    border-radius:999px;
+    padding:13px 26px;
+    cursor:pointer;
+    transition:transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  }
+  button:hover{ transform:translateY(-1px); }
+  button:active{ transform:translateY(0); }
+  .btn-primary{ background:var(--ink); color:var(--paper); }
+  .btn-primary:hover{ background:var(--brass); }
+  .btn-ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .btn-ghost:hover{ border-color:var(--ink); }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid rgba(179,69,47,0.3); }
+  .btn-danger:hover{ background:rgba(179,69,47,0.08); }
+  .btn-sm{ padding:9px 16px; font-size:11px; }
+  button:disabled{ opacity:0.45; cursor:not-allowed; transform:none; }
+
+  /* ---------- Login gate ---------- */
+  #loginGate{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .login-card{
+    width:100%;
+    max-width:380px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:44px 36px;
+  }
+  .login-card .mono-eyebrow{
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--brass);
+  }
+  .login-card h1{
+    font-family:var(--display);
+    font-size:26px;
+    font-weight:700;
+    margin-top:12px;
+    margin-bottom:26px;
+  }
+  .login-error{
+    color:var(--danger);
+    font-size:13px;
+    margin-top:10px;
+    display:none;
+  }
+  .login-error.show{ display:block; }
+  .login-hint{
+    margin-top:22px;
+    font-size:12.5px;
+    color:var(--grey-light);
+    line-height:1.6;
+  }
+
+  /* ---------- App shell ---------- */
+  #app{ display:none; }
+  #app.ready{ display:block; }
+
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(250,249,247,0.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1200px;
+    margin:0 auto;
+    padding:18px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .topbar-logo{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:15px;
+  }
+  .topbar-logo span{ color:var(--brass); }
+  .topbar-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+  .status-pill{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.04em;
+    padding:7px 14px;
+    border-radius:999px;
+    background:var(--brass-wash);
+    color:var(--brass);
+    display:none;
+    align-items:center;
+    gap:8px;
+  }
+  .status-pill.show{ display:inline-flex; }
+  .status-pill .dot{ width:6px; height:6px; border-radius:999px; background:var(--brass); animation:pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  .layout{
+    max-width:1200px;
+    margin:0 auto;
+    padding:36px 28px 120px;
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:40px;
+    align-items:start;
+  }
+  @media (max-width:880px){ .layout{ grid-template-columns:1fr; } }
+
+  .side-nav{
+    position:sticky;
+    top:90px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  @media (max-width:880px){
+    .side-nav{ position:static; flex-direction:row; overflow-x:auto; gap:8px; padding-bottom:8px; }
+  }
+  .side-nav button{
+    all:unset;
+    cursor:pointer;
+    font-family:var(--body);
+    font-size:14px;
+    padding:12px 16px;
+    border-radius:8px;
+    color:var(--grey);
+    white-space:nowrap;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .side-nav button.active{ background:var(--ink); color:var(--paper); }
+  .side-nav button:hover:not(.active){ background:var(--paper); color:var(--ink); }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:32px;
+    margin-bottom:24px;
+  }
+  .card h2{
+    font-family:var(--display);
+    font-size:19px;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .card .sub{
+    font-size:13.5px;
+    color:var(--grey);
+    margin-bottom:26px;
+  }
+
+  .proj-row{
+    display:grid;
+    grid-template-columns:64px 1fr 1.1fr 1.3fr auto;
+    gap:14px;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .proj-row:last-child{ border-bottom:none; }
+  @media (max-width:720px){ .proj-row{ grid-template-columns:1fr; } }
+  .proj-thumb{
+    width:64px; height:64px;
+    border-radius:8px;
+    background:var(--paper-alt);
+    background-size:cover;
+    background-position:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:var(--mono);
+    font-size:9px;
+    color:var(--grey-light);
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .proj-row input{ font-size:13px; padding:9px 12px; }
+  .proj-row textarea{ font-size:13px; padding:9px 12px; min-height:64px; }
+  .proj-num{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--brass);
+  }
+  .upload-btn{
+    font-family:var(--mono);
+    font-size:10.5px;
+    padding:9px 12px;
+    border-radius:6px;
+    background:var(--paper-alt);
+    border:1px solid var(--line);
+    color:var(--ink);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .upload-btn:hover{ border-color:var(--ink); transform:none; }
+  .upload-btn input[type=file]{ display:none; }
+
+  .skills-edit-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:720px){ .skills-edit-grid{ grid-template-columns:1fr; } }
+
+  .about-card-edit{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:14px;
+  }
+  .about-card-edit .num-badge{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--brass);
+    margin-bottom:12px;
+    display:inline-block;
+  }
+
+  .publish-bar{
+    position:sticky;
+    bottom:0;
+    left:0; right:0;
+    background:var(--paper);
+    border-top:1px solid var(--line);
+    padding:18px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    box-shadow:0 -8px 24px rgba(0,0,0,0.03);
+  }
+  .publish-bar-inner{
+    max-width:1200px;
+    margin:0 auto;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .publish-msg{
+    font-size:12.5px;
+    color:var(--grey);
+    max-width:420px;
+  }
+  .toast{
+    position:fixed;
+    bottom:100px;
+    right:28px;
+    background:var(--ink);
+    color:var(--paper);
+    padding:14px 20px;
+    border-radius:10px;
+    font-size:13.5px;
+    transform:translateY(20px);
+    opacity:0;
+    pointer-events:none;
+    transition:all 0.3s ease;
+    z-index:200;
+    max-width:320px;
+  }
+  .toast.show{ transform:translateY(0); opacity:1; }
+
+  .note-box{
+    background:var(--brass-wash);
+    border:1px solid rgba(169,126,74,0.25);
+    border-radius:10px;
+    padding:18px 20px;
+    font-size:13px;
+    color:#5c4423;
+    line-height:1.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN GATE ================= -->
+<div id="loginGate">
+  <div class="login-card">
+    <div class="mono-eyebrow">Accès privé</div>
+    <h1>Administration<br>du portfolio</h1>
+    <form id="loginForm">
+      <div class="field">
+        <label for="pwd">Mot de passe</label>
+        <input type="password" id="pwd" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;">Se connecter</button>
+      <div class="login-error" id="loginError">Mot de passe incorrect.</div>
+    </form>
+    <div class="login-hint">Mot de passe par défaut : <strong>winner2026</strong> — changez-le dans le code de <code>admin.html</code> (variable <code>ADMIN_PASSWORD</code>) avant de mettre ce fichier en ligne.</div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-logo">AKA <span>WINNER</span> — Admin</div>
+      <div class="topbar-actions">
+        <span class="status-pill" id="statusPill"><span class="dot"></span> <span id="statusText">Publication en cours…</span></span>
+        <a href="index.html" target="_blank" class="btn-ghost btn-sm" style="text-decoration:none; display:inline-block;">Voir le site ↗</a>
+        <button class="btn-danger btn-sm" id="logoutBtn">Déconnexion</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav class="side-nav" id="sideNav">
+      <button data-panel="hero" class="active">Accueil / Hero</button>
+      <button data-panel="about">Qui suis-je</button>
+      <button data-panel="work">Projets</button>
+      <button data-panel="skills">Compétences</button>
+      <button data-panel="contact">Contact</button>
+      <button data-panel="settings">Réglages</button>
+    </nav>
+
+    <div>
+      <!-- HERO PANEL -->
+      <div class="panel active" data-panel="hero">
+        <div class="card">
+          <h2>Section d'accueil</h2>
+          <p class="sub">Le texte et la photo affichés en haut du site.</p>
+
+          <div class="field"><label>Eyebrow (petit texte au-dessus du titre)</label><input id="f_hero_eyebrow"></div>
+          <div class="field-row">
+            <div class="field"><label>Titre — ligne 1</label><input id="f_hero_title1"></div>
+            <div class="field"><label>Titre — ligne 2</label><input id="f_hero_title2"></div>
+          </div>
+          <div class="field"><label>Titre — mot accentué (couleur laiton)</label><input id="f_hero_accent"></div>
+          <div class="field"><label>Rôle / poste</label><input id="f_hero_role"></div>
+          <div class="field"><label>Phrase d'accroche</label><textarea id="f_hero_tagline"></textarea></div>
+          <div class="field"><label>Légende sous la photo</label><input id="f_hero_tag"></div>
+
+          <div class="field">
+            <label>Photo de portrait</label>
+            <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+              <div class="proj-thumb" id="heroThumb" style="width:72px;height:72px;">Aperçu</div>
+              <input id="f_hero_portrait" placeholder="URL de l'image ou profile.jpg" style="flex:1; min-width:200px;">
+              <label class="upload-btn">Téléverser
+                <input type="file" accept="image/*" id="heroUpload">
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABOUT PANEL -->
+      <div class="panel" data-panel="about">
+        <div class="card">
+          <h2>Qui suis-je</h2>
+          <p class="sub">Présentation et les trois cartes de compétences.</p>
+          <div class="field"><label>Eyebrow</label><input id="f_about_eyebrow"></div>
+          <div class="field"><label>Titre de section</label><input id="f_about_heading"></div>
+          <div class="field"><label>Paragraphe 1</label><textarea id="f_about_text1"></textarea></div>
+          <div class="field"><label>Paragraphe 2</label><textarea id="f_about_text2"></textarea></div>
+        </div>
+        <div class="card">
+          <h2>Cartes (01, 02, 03)</h2>
+          <p class="sub">Les trois blocs sous la présentation.</p>
+          <div id="aboutCardsEdit"></div>
+        </div>
+      </div>
+
+      <!-- WORK PANEL -->
+      <div class="panel" data-panel="work">
+        <div class="card">
+          <h2>Section projets</h2>
+          <div class="field"><label>Eyebrow</label><input id="f_work_eyebrow"></div>
+          <div class="field"><label>Titre de section</label><input id="f_work_heading"></div>
+          <div class="field"><label>Sous-texte</label><textarea id="f_work_sub"></textarea></div>
+        </div>
+        <div class="card">
+          <h2>Galerie 1 — Design graphique</h2>
+          <p class="sub">Collez une URL d'image, ou téléversez un fichier (il sera automatiquement redimensionné).</p>
+          <div id="galleryDesignEdit"></div>
+        </div>
+        <div class="card">
+          <h2>Galerie 2 — Création de contenu</h2>
+          <div id="galleryContentEdit"></div>
+        </div>
+      </div>
+
+      <!-- SKILLS PANEL -->
+      <div class="panel" data-panel="skills">
+        <div class="card">
+          <h2>Compétences</h2>
+          <div class="field"><label>Eyebrow</label><input id="f_skills_eyebrow"></div>
+          <div class="field"><label>Titre de section</label><input id="f_skills_heading"></div>
+          <p class="sub" style="margin-top:20px;">Les 8 cartes de compétences</p>
+          <div class="skills-edit-grid" id="skillsItemsEdit"></div>
+        </div>
+        <div class="card">
+          <h2>Outils maîtrisés</h2>
+          <div class="field-row" id="toolsEdit"></div>
+        </div>
+      </div>
+
+      <!-- CONTACT PANEL -->
+      <div class="panel" data-panel="contact">
+        <div class="card">
+          <h2>Section contact</h2>
+          <div class="field"><label>Eyebrow</label><input id="f_contact_eyebrow"></div>
+          <div class="field-row">
+            <div class="field"><label>Titre — ligne 1</label><input id="f_contact_title1"></div>
+            <div class="field"><label>Titre — mot accentué</label><input id="f_contact_accent"></div>
+          </div>
+          <div class="field"><label>Sous-texte</label><textarea id="f_contact_sub"></textarea></div>
+        </div>
+        <div class="card">
+          <h2>Coordonnées</h2>
+          <div class="field"><label>Email</label><input id="f_contact_email"></div>
+          <div class="field-row">
+            <div class="field"><label>Téléphone / WhatsApp 1</label><input id="f_contact_phone1"></div>
+            <div class="field"><label>Téléphone / WhatsApp 2</label><input id="f_contact_phone2"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Réseaux sociaux</h2>
+          <div class="field"><label>Instagram (URL)</label><input id="f_social_instagram" placeholder="https://instagram.com/..."></div>
+          <div class="field"><label>LinkedIn (URL)</label><input id="f_social_linkedin" placeholder="https://linkedin.com/in/..."></div>
+          <div class="field"><label>WhatsApp (URL wa.me)</label><input id="f_social_whatsapp" placeholder="https://wa.me/2250502008084"></div>
+          <div class="field"><label>Behance (URL)</label><input id="f_social_behance" placeholder="https://behance.net/..."></div>
+        </div>
+        <div class="card">
+          <h2>Footer</h2>
+          <div class="field"><label>Nom affiché</label><input id="f_footer_name"></div>
+          <div class="field"><label>Texte du footer</label><input id="f_footer_text"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS PANEL -->
+      <div class="panel" data-panel="settings">
+        <div class="card">
+          <h2>Sauvegarde &amp; export</h2>
+          <p class="sub">Exportez votre contenu pour le garder en sécurité, ou transférez-le vers un autre navigateur.</p>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <button class="btn-ghost" id="exportBtn">Exporter en JSON</button>
+            <label class="upload-btn" style="padding:13px 26px; font-size:12.5px;">Importer un JSON
+              <input type="file" accept="application/json" id="importFile">
+            </label>
+            <button class="btn-danger" id="resetBtn">Réinitialiser tout</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Délai de publication</h2>
+          <p class="sub">Temps d'affichage du bandeau « nouvelle mise à jour disponible » avant que le changement apparaisse sur le site.</p>
+          <div class="field" style="max-width:220px;">
+            <label>Délai (secondes)</label>
+            <input type="number" id="f_publish_delay" min="2" max="60" value="6">
+          </div>
+        </div>
+        <div class="card">
+          <div class="note-box">
+            <strong>Comment ça fonctionne :</strong> ce back-office et le site principal partagent leurs données via le stockage local de votre navigateur. Les mises à jour sont donc instantanées entre les onglets ouverts sur <em>cet ordinateur</em>. Pour que tous les visiteurs, sur tous les appareils, voient vos changements en direct sans que vous ayez à re-téléverser le site, il faut connecter les deux pages à une vraie base de données (un petit service comme Firebase ou Supabase, par exemple). Je peux vous aider à mettre ça en place si vous le souhaitez — dites-le-moi.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="publish-bar">
+    <div class="publish-bar-inner">
+      <div class="publish-msg" id="publishMsg">Les modifications sont enregistrées automatiquement en brouillon. Cliquez sur « Publier » pour les envoyer sur le site.</div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-ghost" id="discardBtn">Annuler les changements</button>
+        <button class="btn-primary" id="publishBtn">Publier sur le site</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var ADMIN_PASSWORD = "winner2026"; // ⚠️ Changez ce mot de passe avant de mettre le site en ligne.
+  var C = window.AWContent;
+  var state = C.getDraftContent();
+
+  // ---------- Login ----------
+  var loginGate = document.getElementById('loginGate');
+  var app = document.getElementById('app');
+  var SESSION_KEY = 'aw_admin_session';
+
+  function unlock(){
+    loginGate.style.display = 'none';
+    app.classList.add('ready');
+    hydrateForm();
+  }
+
+  if (sessionStorage.getItem(SESSION_KEY) === '1'){
+    unlock();
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwd').value;
+    if (val === ADMIN_PASSWORD){
+      sessionStorage.setItem(SESSION_KEY, '1');
+      unlock();
+    } else {
+      document.getElementById('loginError').classList.add('show');
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  });
+
+  // ---------- Side nav ----------
+  var navButtons = document.querySelectorAll('.side-nav button');
+  navButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      navButtons.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+      document.querySelector('.panel[data-panel="'+btn.dataset.panel+'"]').classList.add('active');
+    });
+  });
+
+  // ---------- Toast ----------
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3200);
+  }
+
+  // ---------- Image resize helper ----------
+  function resizeImageFile(file, maxDim, quality, cb){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var w = img.width, h = img.height;
+        if (w > h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
+        else if (h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        cb(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ---------- Simple field bindings ----------
+  var bindings = [
+    ['f_hero_eyebrow', ['hero','eyebrow']],
+    ['f_hero_title1', ['hero','titleLine1']],
+    ['f_hero_title2', ['hero','titleLine2']],
+    ['f_hero_accent', ['hero','titleAccent']],
+    ['f_hero_role', ['hero','role']],
+    ['f_hero_tagline', ['hero','tagline']],
+    ['f_hero_tag', ['hero','portraitTag']],
+    ['f_hero_portrait', ['hero','portraitUrl']],
+
+    ['f_about_eyebrow', ['about','eyebrow']],
+    ['f_about_heading', ['about','heading']],
+    ['f_about_text1', ['about','text1']],
+    ['f_about_text2', ['about','text2']],
+
+    ['f_work_eyebrow', ['work','eyebrow']],
+    ['f_work_heading', ['work','heading']],
+    ['f_work_sub', ['work','sub']],
+
+    ['f_skills_eyebrow', ['skills','eyebrow']],
+    ['f_skills_heading', ['skills','heading']],
+
+    ['f_contact_eyebrow', ['contact','eyebrow']],
+    ['f_contact_title1', ['contact','titleLine1']],
+    ['f_contact_accent', ['contact','titleAccent']],
+    ['f_contact_sub', ['contact','sub']],
+    ['f_contact_email', ['contact','email']],
+    ['f_contact_phone1', ['contact','phone1']],
+    ['f_contact_phone2', ['contact','phone2']],
+
+    ['f_social_instagram', ['contact','socials','instagram']],
+    ['f_social_linkedin', ['contact','socials','linkedin']],
+    ['f_social_whatsapp', ['contact','socials','whatsapp']],
+    ['f_social_behance', ['contact','socials','behance']],
+
+    ['f_footer_name', ['footer','name']],
+    ['f_footer_text', ['footer','text']],
+  ];
+
+  function getPath(obj, path){
+    return path.reduce(function(o, k){ return (o || {})[k]; }, obj);
+  }
+  function setPath(obj, path, value){
+    var o = obj;
+    for (var i = 0; i < path.length - 1; i++){ o = o[path[i]]; }
+    o[path[path.length - 1]] = value;
+  }
+
+  function hydrateSimpleFields(){
+    bindings.forEach(function(b){
+      var el = document.getElementById(b[0]);
+      if (el) el.value = getPath(state, b[1]) || '';
+    });
+  }
+
+  function attachSimpleFieldListeners(){
+    bindings.forEach(function(b){
+      var el = document.getElementById(b[0]);
+      if (!el) return;
+      el.addEventListener('input', function(){
+        setPath(state, b[1], el.value);
+        persistDraft();
+      });
+    });
+  }
+
+  // ---------- About cards ----------
+  function renderAboutCardsEdit(){
+    var container = document.getElementById('aboutCardsEdit');
+    container.innerHTML = '';
+    state.about.cards.forEach(function(card, i){
+      var wrap = document.createElement('div');
+      wrap.className = 'about-card-edit';
+      wrap.innerHTML =
+        '<div class="num-badge">0'+(i+1)+'</div>'+
+        '<div class="field"><label>Titre</label><input data-idx="'+i+'" data-f="title" value="'+escapeAttr(card.title)+'"></div>'+
+        '<div class="field" style="margin-bottom:0;"><label>Texte</label><textarea data-idx="'+i+'" data-f="text">'+escapeHTML(card.text)+'</textarea></div>';
+      container.appendChild(wrap);
+    });
+    container.querySelectorAll('input,textarea').forEach(function(el){
+      el.addEventListener('input', function(){
+        var idx = +el.dataset.idx, f = el.dataset.f;
+        state.about.cards[idx][f] = el.value;
+        persistDraft();
+      });
+    });
+  }
+
+  // ---------- Skills items + tools ----------
+  function renderSkillsItemsEdit(){
+    var container = document.getElementById('skillsItemsEdit');
+    container.innerHTML = '';
+    state.skills.items.forEach(function(item, i){
+      var field = document.createElement('div');
+      field.className = 'field';
+      field.innerHTML = '<label>Compétence '+(i+1)+'</label><input data-idx="'+i+'">';
+      container.appendChild(field);
+      field.querySelector('input').value = item;
+      field.querySelector('input').addEventListener('input', function(e){
+        state.skills.items[i] = e.target.value;
+        persistDraft();
+      });
+    });
+  }
+  function renderToolsEdit(){
+    var container = document.getElementById('toolsEdit');
+    container.innerHTML = '';
+    state.skills.tools.forEach(function(tool, i){
+      var field = document.createElement('div');
+      field.className = 'field';
+      field.innerHTML = '<label>Outil '+(i+1)+'</label><input>';
+      container.appendChild(field);
+      field.querySelector('input').value = tool;
+      field.querySelector('input').addEventListener('input', function(e){
+        state.skills.tools[i] = e.target.value;
+        persistDraft();
+      });
+    });
+  }
+
+  // ---------- Project galleries ----------
+  function renderGalleryEdit(containerId, listKey){
+    var container = document.getElementById(containerId);
+    container.innerHTML = '';
+    state.work[listKey].forEach(function(proj, i){
+      var num = (i+1) < 10 ? '0'+(i+1) : (i+1);
+      var row = document.createElement('div');
+      row.className = 'proj-row';
+      row.innerHTML =
+        '<div class="proj-thumb" data-thumb style="'+(proj.url ? 'background-image:url(\''+proj.url+'\')' : '')+'">'+(proj.url ? '' : num)+'</div>'+
+        '<input data-f="name" placeholder="Nom du projet" value="'+escapeAttr(proj.name)+'">'+
+        '<input data-f="url" placeholder="URL de l\'image (1080×1080)" value="'+escapeAttr(proj.url)+'">'+
+        '<textarea data-f="bio" placeholder="Petite biographie du projet">'+escapeHTML(proj.bio || '')+'</textarea>'+ 
+        '<label class="upload-btn">Fichier<input type="file" accept="image/*" data-upload></label>';
+      container.appendChild(row);
+
+      row.querySelector('[data-f="name"]').addEventListener('input', function(e){
+        state.work[listKey][i].name = e.target.value;
+        persistDraft();
+      });
+      row.querySelector('[data-f="bio"]').addEventListener('input', function(e){
+        state.work[listKey][i].bio = e.target.value;
+        persistDraft();
+      });
+      var urlInput = row.querySelector('[data-f="url"]');
+      urlInput.addEventListener('input', function(e){
+        state.work[listKey][i].url = e.target.value;
+        var thumb = row.querySelector('[data-thumb]');
+        thumb.style.backgroundImage = e.target.value ? 'url(\''+e.target.value+'\')' : '';
+        thumb.textContent = e.target.value ? '' : num;
+        persistDraft();
+      });
+      row.querySelector('[data-upload]').addEventListener('change', function(e){
+        var file = e.target.files[0];
+        if (!file) return;
+        resizeImageFile(file, 800, 0.82, function(dataUrl){
+          state.work[listKey][i].url = dataUrl;
+          urlInput.value = dataUrl;
+          var thumb = row.querySelector('[data-thumb]');
+          thumb.style.backgroundImage = 'url(\''+dataUrl+'\')';
+          thumb.textContent = '';
+          persistDraft();
+          toast('Image ajoutée — pensez à publier.');
+        });
+      });
+    });
+  }
+
+  function escapeHTML(s){ return (s||'').replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+  function escapeAttr(s){ return (s||'').replace(/"/g, '&quot;'); }
+
+  // ---------- Hero thumb + upload ----------
+  function updateHeroThumb(){
+    var thumb = document.getElementById('heroThumb');
+    var url = state.hero.portraitUrl;
+    if (url){ thumb.style.backgroundImage = 'url(\''+url+'\')'; thumb.style.backgroundSize='cover'; thumb.style.backgroundPosition='center'; thumb.textContent=''; }
+  }
+  document.getElementById('heroUpload').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if (!file) return;
+    resizeImageFile(file, 900, 0.85, function(dataUrl){
+      state.hero.portraitUrl = dataUrl;
+      document.getElementById('f_hero_portrait').value = dataUrl;
+      updateHeroThumb();
+      persistDraft();
+      toast('Photo mise à jour — pensez à publier.');
+    });
+  });
+
+  // ---------- Draft persistence ----------
+  var draftSaveTimer = null;
+  function persistDraft(){
+    clearTimeout(draftSaveTimer);
+    draftSaveTimer = setTimeout(function(){
+      C.saveDraft(state);
+    }, 250);
+  }
+
+  function hydrateForm(){
+    hydrateSimpleFields();
+    attachSimpleFieldListeners();
+    renderAboutCardsEdit();
+    renderSkillsItemsEdit();
+    renderToolsEdit();
+    renderGalleryEdit('galleryDesignEdit', 'design');
+    renderGalleryEdit('galleryContentEdit', 'content');
+    updateHeroThumb();
+  }
+
+  // ---------- Publish ----------
+  var statusPill = document.getElementById('statusPill');
+  var statusText = document.getElementById('statusText');
+  var publishBtn = document.getElementById('publishBtn');
+
+  publishBtn.addEventListener('click', function(){
+    var delaySec = Math.max(2, Math.min(60, +document.getElementById('f_publish_delay').value || 6));
+    C.saveDraft(state);
+    C.publish(state, delaySec * 1000);
+    publishBtn.disabled = true;
+    statusPill.classList.add('show');
+    statusText.textContent = 'Bandeau affiché sur le site — publication dans ' + delaySec + 's…';
+    toast('Publication lancée : le bandeau « nouvelle mise à jour » vient d\'apparaître sur le site.');
+
+    setTimeout(function(){
+      publishBtn.disabled = false;
+      statusText.textContent = 'Mise à jour publiée ✓';
+      setTimeout(function(){ statusPill.classList.remove('show'); }, 2500);
+    }, delaySec * 1000);
+  });
+
+  document.getElementById('discardBtn').addEventListener('click', function(){
+    if (!confirm('Annuler toutes les modifications non publiées ?')) return;
+    state = C.getPublishedContent();
+    C.saveDraft(state);
+    hydrateForm();
+    toast('Brouillon réinitialisé sur la dernière version publiée.');
+  });
+
+  // ---------- Export / Import / Reset ----------
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'aka-winner-contenu.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('importFile').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        var imported = JSON.parse(ev.target.result);
+        state = C.deepMerge(C.DEFAULT_CONTENT, imported);
+        C.saveDraft(state);
+        hydrateForm();
+        toast('Contenu importé. Cliquez sur « Publier » pour l\'envoyer sur le site.');
+      } catch(err){
+        alert('Fichier JSON invalide.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if (!confirm('Réinitialiser tout le contenu (site + brouillon) aux valeurs par défaut ? Cette action est irréversible.')) return;
+    C.resetAll();
+    state = C.getPublishedContent();
+    hydrateForm();
+    toast('Contenu réinitialisé.');
+  });
+})();
+</script>
+</body>
+</html>
