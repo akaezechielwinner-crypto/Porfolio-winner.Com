@@ -509,8 +509,6 @@
   var C = window.AWContent;
   var state = C.getDraftContent();
 
-  hydrateForm();
-
   // ---------- Side nav ----------
   var navButtons = document.querySelectorAll('.side-nav button');
   navButtons.forEach(function(btn){
@@ -825,6 +823,8 @@
     hydrateForm();
     toast('Contenu réinitialisé.');
   });
+
+  hydrateForm();
 })();
 </script>
 </body>
