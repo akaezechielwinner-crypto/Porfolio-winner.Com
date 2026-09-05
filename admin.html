@@ -36,6 +36,7 @@
     font-family:var(--body);
     line-height:1.6;
     -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
   }
   a{ color:inherit; }
   ::selection{ background:var(--brass); color:var(--paper); }
@@ -154,6 +155,16 @@
   }
   @media (max-width:880px){
     .side-nav{ position:static; flex-direction:row; overflow-x:auto; gap:8px; padding-bottom:8px; }
+  }
+  @media (max-width:560px){
+    .topbar-inner{ padding:14px 16px; align-items:flex-start; }
+    .topbar-actions{ gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .status-pill{ display:none; }
+    .layout{ padding:16px 16px 110px; }
+    .card{ padding:20px 16px; }
+    .publish-bar{ padding:14px 16px; }
+    .publish-bar-inner{ align-items:stretch; }
+    .publish-bar-inner button{ width:100%; }
   }
   .side-nav button{
     all:unset;
