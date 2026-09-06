@@ -1230,6 +1230,7 @@
   var barFill = document.getElementById('updateBarFill');
   var pendingTimer = null;
   var barInterval = null;
+  var pendingSeenTs = null;
 
   function showPendingBanner(delay, elapsed){
     banner.classList.remove('applied');
@@ -1250,6 +1251,7 @@
     clearInterval(barInterval);
     barFill.style.width = '100%';
     var updated = C.applyPending();
+    pendingSeenTs = null;
     render(updated);
     bannerText.textContent = 'Mise à jour appliquée ✓';
     banner.classList.add('applied');
@@ -1260,6 +1262,7 @@
   (function checkOnLoad(){
     var flag = C.getPendingFlag();
     if (flag && flag.active){
+      pendingSeenTs = flag.ts;
       var elapsed = Date.now() - flag.ts;
       if (elapsed >= flag.delay){
         applyNow();
@@ -1273,11 +1276,21 @@
   window.addEventListener('storage', function(e){
     if (e.key === C.KEYS.pendingFlag){
       var flag = C.getPendingFlag();
-      if (flag && flag.active){
+      if (flag && flag.active && flag.ts !== pendingSeenTs){
+        pendingSeenTs = flag.ts;
         showPendingBanner(flag.delay, Date.now() - flag.ts);
       }
     }
   });
+
+  // Fallback for browsers that suspend or delay cross-tab storage events.
+  setInterval(function(){
+    var flag = C.getPendingFlag();
+    if (flag && flag.active && flag.ts !== pendingSeenTs){
+      pendingSeenTs = flag.ts;
+      showPendingBanner(flag.delay, Date.now() - flag.ts);
+    }
+  }, 1000);
 
   // ---------- Gallery tabs ----------
   var tabs = document.querySelectorAll('.gallery-tab');
